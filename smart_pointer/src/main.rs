@@ -8,8 +8,11 @@ use std::rc::{Rc, Weak};
 #[derive(Debug)]
 struct Node {
     id: i32,
-    next: Option<Rc<RefCell<Node>>>,
+    next: Option<NodeLink>,
 }
+
+type NodeLink = Rc<RefCell<Node>>;
+
 impl Drop for Node {
     fn drop(&mut self) {
         print!("{:?}", self);
