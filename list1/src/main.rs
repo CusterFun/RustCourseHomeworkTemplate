@@ -1,50 +1,164 @@
-#![allow(unused)]
+// linked_list.rs
 
+// 节点链接用 Box 指针（大小确定），因为确定大小才能分配内存
+type Link<T> = Option<Box<Node<T>>>;
 
-/// 链表数字顺序从小到大
-/// push(3)
-/// 3
-/// push(1)
-/// 1 -> 3
-/// push(2)
-/// 1 -> 2 -> 3
-/// pop(2)
-/// 1 -> 3
-
-pub struct List {
-    head: Link,
+// 链表定义
+pub struct List<T> {
+    size: usize,   // 链表节点数
+    head: Link<T>, // 头节点
 }
 
-type Link = Option<Box<Node>>;
-
-#[derive(Clone)]
-struct Node {
-    val: i32,
-    next: Link,
+// 链表节点
+struct Node<T> {
+    elem: T,       // 数据
+    next: Link<T>, // 下一个节点链接
 }
 
-impl List {
-    fn new() -> Self {
-        todo!()
+impl<T> List<T> {
+    pub fn new() -> Self {
+        List {
+            size: 0,
+            head: None,
+        }
     }
 
-    // insert a value
-    // 如果有相同的数字，仍然插入
-    fn push(&self, v: i32) {
-
+    // 新节点总是加到头部，
+    pub fn push(&mut self, elem: T) {
+        let node = Box::new(Node {
+            elem,
+            next: self.head.take(),
+        });
+        self.head = Some(node);
+        self.size += 1;
     }
 
-    // pop 有这个数字 就返回 Some(i32)
-    // 没有 就返回None
-    // 如果有相同的数字，就删除一个就好了
-    fn pop(&self, v: i32) -> Option<i32> {
-        todo!()
+    // take 会取出数据留下空位
+    pub fn pop(&mut self) -> Option<T> {
+        self.head.take().map(|node| {
+            self.head = node.next;
+            self.size -= 1;
+            node.elem
+        })
+    }
+
+    // 以下是实现的三种迭代功能
+    // into_iter: 链表改变，成为迭代器
+    // iter: 链表不变，只得到不可变迭代器
+    // iter_mut: 链表不变，得到可变迭代器
+    pub fn into_iter(self) -> IntoIter<T> {
+        IntoIter(self)
+    }
+
+    pub fn iter(&self) -> Iter<T> {
+        Iter {
+            next: self.head.as_deref(),
+        }
+    }
+
+    pub fn iter_mut(&mut self) -> IterMut<T> {
+        IterMut {
+            next: self.head.as_deref_mut(),
+        }
     }
 }
 
-// O(1)
-// Iter, IterMut, IntoIterator
-// 顺序是从小的数字到大的数字输出
+// 实现三种迭代功能
+pub struct IntoIter<T>(List<T>);
+impl<T> Iterator for IntoIter<T> {
+    type Item = T;
+    fn next(&mut self) -> Option<Self::Item> {
+        self.0.pop() // (List<T>) 元组的第 0 项
+    }
+}
 
+pub struct Iter<'a, T: 'a> {
+    next: Option<&'a Node<T>>,
+}
+impl<'a, T> Iterator for Iter<'a, T> {
+    type Item = &'a T;
+    fn next(&mut self) -> Option<Self::Item> {
+        self.next.map(|node| {
+            self.next = node.next.as_deref();
+            &node.elem
+        })
+    }
+}
 
-fn main() {}
+pub struct IterMut<'a, T: 'a> {
+    next: Option<&'a mut Node<T>>,
+}
+impl<'a, T> Iterator for IterMut<'a, T> {
+    type Item = &'a mut T;
+    fn next(&mut self) -> Option<Self::Item> {
+        self.next.take().map(|node| {
+            self.next = node.next.as_deref_mut();
+            &mut node.elem
+        })
+    }
+}
+
+// 为链表实现自定义 Drop
+impl<T> Drop for List<T> {
+    fn drop(&mut self) {
+        let mut link = self.head.take();
+        while let Some(mut node) = link {
+            link = node.next.take();
+        }
+    }
+}
+
+fn main() {
+    fn basic_test() {
+        let mut list = List::new();
+        list.push(1);
+        list.push(2);
+        list.push(3);
+        assert_eq!(list.pop(), Some(3));
+        println!("basics test Ok!");
+    }
+
+    fn into_iter_test() {
+        let mut list = List::new();
+        list.push(1);
+        list.push(2);
+        list.push(3);
+        let mut iter = list.into_iter();
+        assert_eq!(iter.next(), Some(3));
+        assert_eq!(iter.next(), Some(2));
+        assert_eq!(iter.next(), Some(1));
+        assert_eq!(iter.next(), None);
+        println!("into_iter test Ok!");
+    }
+
+    fn iter_test() {
+        let mut list = List::new();
+        list.push(1);
+        list.push(2);
+        list.push(3);
+        let mut iter = list.iter();
+        assert_eq!(iter.next(), Some(&3));
+        assert_eq!(iter.next(), Some(&2));
+        assert_eq!(iter.next(), Some(&1));
+        assert_eq!(iter.next(), None);
+        println!("iter test Ok!");
+    }
+
+    fn iter_mut_test() {
+        let mut list = List::new();
+        list.push(1);
+        list.push(2);
+        list.push(3);
+        let mut iter = list.iter_mut();
+        assert_eq!(iter.next(), Some(&mut 3));
+        assert_eq!(iter.next(), Some(&mut 2));
+        assert_eq!(iter.next(), Some(&mut 1));
+        assert_eq!(iter.next(), None);
+        println!("iter_mut test Ok!");
+    }
+
+    basic_test();
+    into_iter_test();
+    iter_test();
+    iter_mut_test();
+}

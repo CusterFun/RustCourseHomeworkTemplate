@@ -31,15 +31,16 @@
 // 多重Hash
 // History
 // rc
+// https://codereview.stackexchange.com/questions/260000/minimal-list-definition-in-rust
 
 struct ListHistory<T> {
-    list: List<T>
+    list: List<T>,
 }
 
 // implement Drop trait and call methods
 impl<T> ListHistory<T> {
     pub fn new() -> Self {
-        todo!()
+        ListHistory { list: List::new() }
     }
 
     pub fn get_list_version(&self, version: u64) -> Option<List<T>> {
@@ -86,7 +87,7 @@ impl<T> List<T> {
     pub fn prepend(&self, elem: T) -> List<T> {
         List {
             head: Some(Rc::new(Node {
-                elem: elem,
+                elem,
                 next: self.head.clone(), // Rc
             })),
         }
@@ -130,12 +131,10 @@ impl<'a, T> Iterator for Iter<'a, T> {
     }
 }
 
-
 // push pop
 // push_front push_back
 // pop_front pop_back
 // peek_front peek_back
-
 
 // 加这个 Drop 的初衷
 // 其实是 List 过长的话就会 栈溢出
@@ -154,7 +153,4 @@ impl<'a, T> Iterator for Iter<'a, T> {
 //     }
 // }
 
-
-fn main() {
-
-}
+fn main() {}
