@@ -31,7 +31,8 @@
 // 多重Hash
 // History
 // rc
-// https://codereview.stackexchange.com/questions/260000/minimal-list-definition-in-rust
+
+pub mod vec_list;
 
 struct ListHistory<T> {
     list: List<T>,
@@ -48,21 +49,37 @@ impl<T> ListHistory<T> {
     }
 
     pub fn prepend(&self, elem: T) -> List<T> {
-        todo!()
+        List {
+            head: Some(Rc::new(Node {
+                elem,
+                next: self.list.head.clone(), // Rc
+            })),
+        }
     }
 
     pub fn tail(&self) -> List<T> {
-        todo!()
+        List {
+            head: self.list.head.as_ref().and_then(|node| node.next.clone()),
+        }
     }
 
     pub fn current(&self) -> List<T> {
-        todo!()
+        List {
+            head: self.list.head.as_ref().and_then(|node| node.next.clone()),
+        }
     }
 }
 
 impl<T> Drop for ListHistory<T> {
     fn drop(&mut self) {
-        todo!()
+        let mut head = self.list.head.take();
+        while let Some(node) = head {
+            if let Ok(mut node) = Rc::try_unwrap(node) {
+                head = node.next.take();
+            } else {
+                break;
+            }
+        }
     }
 }
 
