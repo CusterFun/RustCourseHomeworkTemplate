@@ -2,17 +2,26 @@ macro_rules! myprint {
     ($x: expr) => {
         println!("{}", $x)
     };
-    ($x: expr, $($y: expr),+) => {
-        let mut vec = Vec::new();
-        if $x % 2 != 0 {
-            println!("{}", $x);
-        } else {
-            vec.push($x);
-        }
-        myprint!($($y),+);
-        for v in vec.iter() {
-            println!("{}", v);
-        }
+    // ($x: expr, $($y: expr),+) => {
+    //     let mut vec = Vec::new();
+    //     if $x % 2 != 0 {
+    //         println!("{}", $x);
+    //     } else {
+    //         vec.push($x);
+    //     }
+    //     myprint!($($y),+);
+    //     for v in vec.iter() {
+    //         println!("{}", v);
+    //     }
+    // };
+    ($x: expr, $y: expr) => {
+        println!("{}", $x);
+        println!("{}", $y);
+    };
+    ($x: expr, $y:expr, $($z: expr),+) => {
+        println!("{}", $x);
+        myprint!($($z),+);
+        println!("{}", $y);
     };
 }
 
