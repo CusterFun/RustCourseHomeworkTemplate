@@ -11,9 +11,9 @@
 1. Lifetime [作业](lifetime/basic.md) √
 2. Functional Programing [作业](./functional-programing/closure.md) √
 3. Types & Macro [作业](./newtype-sized.md) √
-4. Smart Pointers [作业](./smart_pointer/main.rs)
-5. Impl List1 [作业](./list1) √
-6. Impl List2 [作业](./list2)
-7. Multithread [作业](thread/)
-8. Unsafe [作业](macro_rules)
+4. Smart Pointers [作业](./smart_pointer/src/main.rs)
+5. Impl List1 [作业](./list1/src/main.rs) √
+6. Impl List2 [作业](./list2/src/main.rs)
+7. Multithread [作业](thread/src/main.rs) 
+8. Unsafe [作业](macro_rules/src/main.rs) √
 9. Unsafe List

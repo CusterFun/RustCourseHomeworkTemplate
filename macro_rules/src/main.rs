@@ -3,8 +3,16 @@ macro_rules! myprint {
         println!("{}", $x)
     };
     ($x: expr, $($y: expr),+) => {
-        println!("{}", $x);
+        let mut vec = Vec::new();
+        if $x % 2 != 0 {
+            println!("{}", $x);
+        } else {
+            vec.push($x);
+        }
         myprint!($($y),+);
+        for v in vec.iter() {
+            println!("{}", v);
+        }
     };
 }
 
